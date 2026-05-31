@@ -276,8 +276,8 @@
                         <code class="block font-mono p-4 rounded-xl mb-5 text-sm shadow-inner">branch &lt;name&gt;</code>
                         <div class="space-y-3">
                             <p class="text-sm text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">When:</strong> Starting a new app or service inside an umbrella repo.</p>
-                            <p class="text-sm text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">How:</strong> Creates branch, physical folder, and localized <code class="text-brand-600 dark:text-brand-300 bg-brand-500/10 dark:bg-brand-900/30 px-1 rounded font-mono">.agent/HANDOFF.md</code>.</p>
-                            <p class="text-sm text-slate-400 dark:text-slate-500 italic">"Keeps multi-app repos perfectly categorized and human-readable."</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">How:</strong> Creates an empty orphan branch (no history), seeds <code class="text-brand-600 dark:text-brand-300 bg-brand-500/10 dark:bg-brand-900/30 px-1 rounded font-mono">.agent/HANDOFF.md</code>, and immediately publishes to GitHub.</p>
+                            <p class="text-sm text-slate-400 dark:text-slate-500 italic">"Treat an empty branch as a completely new, isolated project."</p>
                         </div>
                     </div>
 
@@ -413,7 +413,7 @@ Do not give me any introductory conversational filler. Go straight to coding.</p
                     
                     <div class="mb-8 relative z-10">
                         <code class="block font-mono p-5 rounded-xl text-sm shadow-inner">checkpoint "middle of debugging odoo payload"</code>
-                        <p class="text-xs text-slate-500 mt-3 font-mono">Injects timestamp and message into <code>.agent/HANDOFF.md</code> and auto-commits.</p>
+                        <p class="text-xs text-slate-500 mt-3 font-mono">Injects timestamp/message, auto-commits, and safely pushes <b>only the current branch</b> (origin HEAD).</p>
                     </div>
 
                     <div class="flex items-center gap-4 mb-6 relative z-10 border-t border-slate-200 dark:border-white/10 pt-8">
