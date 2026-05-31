@@ -36,6 +36,13 @@ cd .worktrees/feat/add-login
 # Start Claude Code or Antigravity inside this folder
 ```
 
+### Start a Subproject Branch
+
+```bash
+branch feat/auth-service
+# Creates branch, scaffolds feat/auth-service/ folder with TODO_AGENT.md, auto-commits
+```
+
 ### Manual Setup
 
 1. Use this template on GitHub → "Use this template" → "Create a new repository"
@@ -137,6 +144,55 @@ function worktree() {
   git worktree add ".worktrees/$1" -b "$1"
   echo "✅ Worktree ready at .worktrees/$1"
   echo "   cd .worktrees/$1 to start coding"
+}
+
+# Usage: branch <subproject-name>
+# Creates a branch + subproject folder with a localized handoff template
+function branch() {
+  if [ -z "$1" ]; then
+    echo "Usage: branch <subproject-name>"
+    return 1
+  fi
+
+  # Enforce clean branch naming: lowercase kebab-case only
+  if [[ ! "$1" =~ ^[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*$ ]]; then
+    echo "❌ Invalid name. Use lowercase kebab-case (e.g., feat/add-login, auth-service)."
+    return 1
+  fi
+
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    echo "❌ Not inside a git repository."
+    return 1
+  fi
+
+  echo "🌿 Creating subproject branch: $1"
+
+  git checkout -b "$1"
+
+  # Create subproject folder at project root
+  mkdir -p "$1"
+
+  # Seed localized handoff template
+  cat > "$1/TODO_AGENT.md" << 'HANDOFF'
+# Agent Handoff State
+
+**🎯 Goal:** [1-sentence description of the overarching objective]
+
+**✅ Completed in Last Session:**
+- [File path]: [Brief description of what was added/fixed]
+
+**🛑 Current State / Blockers:**
+- [Describe the exact state where work stopped. If there is an error, paste the exact error code/message here].
+
+**⏭️ Immediate Next Step:**
+- [The EXACT file, line number, or terminal command the incoming agent should execute first to resume momentum].
+HANDOFF
+
+  git add "$1/"
+  git commit -m "chore: initialize subproject workspace for $1"
+
+  echo "✅ Branch '$1' created with subproject folder."
+  echo "   Edit $1/TODO_AGENT.md to set the goal, then start coding."
 }
 ```
 
