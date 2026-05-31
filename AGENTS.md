@@ -20,6 +20,21 @@ You are strictly forbidden from writing code on the `main` branch.
 4. Execute `git checkout -b <generated-branch-name>`.
 5. Only AFTER confirming the branch creation may you begin file modifications or vibe coding sequences.
 
+### Clean Branch Names
+- Do **not** append random strings, IDs, ticket numbers, or hash codes to branch names.
+- Use strictly human-readable semantic strings (e.g., `feat/add-login`, `fix/auth-timeout`, `refactor/api-layer`).
+- Branch names must be lowercase, kebab-case, and prefixed with a type (`feat/`, `fix/`, `refactor/`, `chore/`).
+
+### Worktree Isolation (Multi-Agent Concurrency)
+When multiple agents need to work simultaneously on different features, use **Git Worktrees** for physical filesystem isolation instead of switching branches in a single directory.
+
+**Worktree Rules:**
+1. All worktrees live inside the `.worktrees/` directory at the project root.
+2. To start a new isolated workspace: `git worktree add .worktrees/<Semantic-Name> -b <Semantic-Name>`.
+3. Each agent operates exclusively inside its own worktree folder.
+4. When the feature is merged, clean up with: `git worktree remove .worktrees/<Semantic-Name>`.
+5. Never create worktrees outside the `.worktrees/` directory.
+
 ## 3. Commit Standards
 - Commit frequently to your feature branch to preserve state.
 - Use semantic commit messages (e.g., `feat: added zoho payload builder`, `fix: resolved auth token expiration`).
