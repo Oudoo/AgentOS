@@ -55,3 +55,10 @@ When you hit a token limit, encounter a hard blocker, or are instructed to pause
 **🛑 Current State / Blockers:** [Exact error message or logical roadblock]
 **⏭️ Next Step:** [Exact file/line to edit next, or command to run]
 ```
+
+## 5. Token-Optimization Directives (CRITICAL)
+To minimize token billing, you must strictly follow these structural execution rules:
+
+1. **Orientation:** Before running widespread searches across the directory, open and read `.agent/repo-map.md` to learn the project structure instantly.
+2. **Surgical Inspection:** Never read entire files exceeding 200 lines if you only need a specific block. Use targeted grep commands or line-specific views (e.g., viewing specific line ranges) to gather code context.
+3. **No Redundant Queries:** Do not re-read files you modified in the same chat turn; rely on your internal session memory.
