@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentOS Master Playbook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfaf8;
+            color: #433d3a;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        .command-card {
+            transition: all 0.2s ease;
+            border: 1px solid #e5e0db;
+        }
+
+        .command-card:hover {
+            border-color: #d4a373;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .active-tab {
+            background-color: #f3eee9;
+            border-left: 4px solid #d4a373;
+            color: #1a1817;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar Navigation -->
+    <nav class="w-full md:w-64 bg-white border-r border-stone-200 p-6 flex flex-col gap-2 shrink-0">
+        <div class="mb-8">
+            <h1 class="text-xl font-bold tracking-tight text-stone-800">AgentOS <span class="text-stone-400 font-light">3.1</span></h1>
+            <p class="text-xs text-stone-500 uppercase tracking-widest mt-1">Operational Manual</p>
+        </div>
+        
+        <button onclick="switchTab('start')" id="btn-start" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors active-tab">
+            1. Bootstrapping
+        </button>
+        <button onclick="switchTab('isolate')" id="btn-isolate" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
+            2. Branch & Isolate
+        </button>
+        <button onclick="switchTab('optimize')" id="btn-optimize" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
+            3. Dev Optimization
+        </button>
+        <button onclick="switchTab('handoff')" id="btn-handoff" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
+            4. Handoff Protocol
+        </button>
+        <button onclick="switchTab('checkpoint')" id="btn-checkpoint" class="tab-btn w-full text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors">
+            5. State Recovery
+        </button>
+
+        <div class="mt-auto pt-6 border-t border-stone-100">
+            <div class="text-[10px] text-stone-400 font-mono">SYSTEM STATUS: NOMINAL</div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-6 md:p-12 overflow-y-auto">
+        
+        <!-- SECTION: BOOTSTRAPPING -->
+        <section id="tab-start" class="tab-content">
+            <header class="mb-10">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">1. Bootstrapping Projects</h2>
+                <p class="text-stone-600 max-w-2xl">Initialize your environment correctly to ensure agents obey the governance rules from the first commit.</p>
+            </header>
+
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-10">
+                <div class="command-card bg-white p-6 rounded-xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="mono text-xs font-bold text-stone-400 uppercase tracking-tighter">New Project</span>
+                        <span class="bg-stone-100 text-stone-600 text-[10px] px-2 py-1 rounded">Automation</span>
+                    </div>
+                    <code class="block mono bg-stone-900 text-stone-100 p-3 rounded mb-4">new &lt;project-name&gt;</code>
+                    <div class="space-y-3">
+                        <p class="text-sm"><strong>When:</strong> Starting a fresh project from scratch.</p>
+                        <p class="text-sm"><strong>How:</strong> Clones template, creates private GitHub repo, and scaffolds.</p>
+                        <p class="text-sm text-stone-500 italic">"Why: Saves 10 minutes of manual setup and ensures 100% compliance."</p>
+                    </div>
+                </div>
+
+                <div class="command-card bg-white p-6 rounded-xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="mono text-xs font-bold text-stone-400 uppercase tracking-tighter">Retrofit</span>
+                        <span class="bg-stone-100 text-stone-600 text-[10px] px-2 py-1 rounded">Governance</span>
+                    </div>
+                    <code class="block mono bg-stone-900 text-stone-100 p-3 rounded mb-4">agent-os</code>
+                    <div class="space-y-3">
+                        <p class="text-sm"><strong>When:</strong> Adding rules to an existing repository.</p>
+                        <p class="text-sm"><strong>How:</strong> Injects AGENTS.md, proxies, and appends to .gitignore.</p>
+                        <p class="text-sm text-stone-500 italic">"Why: Prevents agents from messing up legacy folder structures."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-stone-100 rounded-2xl p-8 border border-stone-200">
+                <h3 class="text-lg font-semibold mb-4">The Governance Core</h3>
+                <p class="text-sm text-stone-700 leading-relaxed mb-6">
+                    Bootstrapping installs the <strong>AGENTS.md</strong> file. This is the "brain" of your project. It contains strict directives that forbid committing to main and force agents to sync before starting.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <span class="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs font-medium">No Main Commits</span>
+                    <span class="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs font-medium">Semantic Branching</span>
+                    <span class="px-3 py-1 bg-white border border-stone-200 rounded-full text-xs font-medium">Sync on Start</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: ISOLATE -->
+        <section id="tab-isolate" class="tab-content hidden">
+            <header class="mb-10">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">2. Branching & Isolation</h2>
+                <p class="text-stone-600 max-w-2xl">Manage parallel work streams and multi-app repositories without file collisions.</p>
+            </header>
+
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-10">
+                <div class="command-card bg-white p-6 rounded-xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="mono text-xs font-bold text-stone-400 uppercase tracking-tighter">Subproject</span>
+                        <span class="bg-blue-50 text-blue-600 text-[10px] px-2 py-1 rounded">Organization</span>
+                    </div>
+                    <code class="block mono bg-stone-900 text-stone-100 p-3 rounded mb-4">branch &lt;name&gt;</code>
+                    <div class="space-y-3">
+                        <p class="text-sm"><strong>When:</strong> Starting a new app or service inside an umbrella repo.</p>
+                        <p class="text-sm"><strong>How:</strong> Creates branch + physical folder + local handoff note.</p>
+                        <p class="text-sm text-stone-500 italic">"Why: Keeps multi-app repos perfectly categorized and human-readable."</p>
+                    </div>
+                </div>
+
+                <div class="command-card bg-white p-6 rounded-xl">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="mono text-xs font-bold text-stone-400 uppercase tracking-tighter">Parallelism</span>
+                        <span class="bg-blue-50 text-blue-600 text-[10px] px-2 py-1 rounded">Safety</span>
+                    </div>
+                    <code class="block mono bg-stone-900 text-stone-100 p-3 rounded mb-4">worktree &lt;branch&gt;</code>
+                    <div class="space-y-3">
+                        <p class="text-sm"><strong>When:</strong> Running two agents (Claude + Antigravity) at once.</p>
+                        <p class="text-sm"><strong>How:</strong> Spawns an isolated directory for that specific branch.</p>
+                        <p class="text-sm text-stone-500 italic">"Why: Prevents agents from breaking each other's dev servers."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-stone-200 pt-10">
+                <h3 class="text-xl font-bold mb-6 text-center">Worktree vs. Branch: The Parallel Advantage</h3>
+                <div class="chart-container">
+                    <canvas id="isolationChart"></canvas>
+                </div>
+                <p class="text-center text-xs text-stone-400 mt-4">Simulated comparison of concurrency efficiency.</p>
+            </div>
+        </section>
+
+        <!-- SECTION: OPTIMIZE -->
+        <section id="tab-optimize" class="tab-content hidden">
+            <header class="mb-10">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">3. Development Optimization</h2>
+                <p class="text-stone-600 max-w-2xl">Reduce token consumption by up to 40% using structural mapping and surgical rules.</p>
+            </header>
+
+            <div class="bg-stone-900 text-stone-100 rounded-2xl p-8 mb-10 overflow-hidden relative">
+                <div class="relative z-10">
+                    <h3 class="text-xl font-bold mb-2">The 'Map' Directive</h3>
+                    <p class="text-stone-400 text-sm mb-6 max-w-lg">Always run `map` before launching an agent. This builds a tiny text tree that prevents the agent from reading every file just to understand the folder structure.</p>
+                    <code class="inline-block mono bg-stone-800 text-yellow-500 px-4 py-2 rounded-lg border border-stone-700">map</code>
+                </div>
+                <div class="absolute right-0 top-0 h-full w-1/3 bg-stone-800 opacity-20 -skew-x-12 translate-x-10"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 border border-stone-200 rounded-xl">
+                    <h4 class="font-bold mb-2 text-stone-800">1. Surgical Read</h4>
+                    <p class="text-xs text-stone-500">Agents are forbidden from reading files over 200 lines if they only need specific blocks.</p>
+                </div>
+                <div class="p-6 border border-stone-200 rounded-xl">
+                    <h4 class="font-bold mb-2 text-stone-800">2. No Probing</h4>
+                    <p class="text-xs text-stone-500">Pin dependencies in code comments so agents don't waste tokens "searching" for API versions.</p>
+                </div>
+                <div class="p-6 border border-stone-200 rounded-xl">
+                    <h4 class="font-bold mb-2 text-stone-800">3. Memory Reuse</h4>
+                    <p class="text-xs text-stone-500">Forced to rely on session memory for files modified in the same turn.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: HANDOFF -->
+        <section id="tab-handoff" class="tab-content hidden">
+            <header class="mb-10">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">4. The Handoff Protocol</h2>
+                <p class="text-stone-600 max-w-2xl">The bridge between agents. GitHub holds the code; TODO_AGENT.md holds the memory.</p>
+            </header>
+
+            <div class="space-y-8">
+                <!-- Outbound -->
+                <div class="p-6 bg-white border-l-4 border-amber-400 rounded-r-xl shadow-sm">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2">
+                        <span>Phase A: The Outbound (Leaving Agent)</span>
+                    </h3>
+                    <p class="text-sm text-stone-600 mb-4">Copy this to the agent you are currently using when tokens are low.</p>
+                    <div class="relative">
+                        <pre class="bg-stone-50 p-4 rounded text-xs mono text-stone-700 overflow-x-auto" id="outbound-prompt">
+We are pausing this session and handing off to another agent. 
+Perform our standard handoff protocol immediately:
+1. Stage and commit all active files.
+2. Push this branch to origin.
+3. Completely overwrite the TODO_AGENT.md file using our master template. 
+Be concise. Write a clear 'Immediate Next Step'.
+Do not include any conversational summary. Execute now.</pre>
+                        <button onclick="copyText('outbound-prompt')" class="absolute top-2 right-2 text-[10px] bg-stone-200 px-2 py-1 rounded hover:bg-stone-300">COPY</button>
+                    </div>
+                </div>
+
+                <!-- Inbound -->
+                <div class="p-6 bg-white border-l-4 border-green-400 rounded-r-xl shadow-sm">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center gap-2">
+                        <span>Phase B: The Inbound (Arriving Agent)</span>
+                    </h3>
+                    <p class="text-sm text-stone-600 mb-4">Copy this to the new agent you just opened in the folder.</p>
+                    <div class="relative">
+                        <pre class="bg-stone-50 p-4 rounded text-xs mono text-stone-700 overflow-x-auto" id="inbound-prompt">
+We are resuming a development session. Execute these steps:
+1. Run `git pull` to fetch the latest codebase state.
+2. Open and read TODO_AGENT.md to capture our goal and blockers.
+3. Execute the 'Immediate Next Step' listed in that file.
+Do not give me any introductory conversational filler. 
+Go straight to coding.</pre>
+                        <button onclick="copyText('inbound-prompt')" class="absolute top-2 right-2 text-[10px] bg-stone-200 px-2 py-1 rounded hover:bg-stone-300">COPY</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: CHECKPOINT -->
+        <section id="tab-checkpoint" class="tab-content hidden">
+            <header class="mb-10">
+                <h2 class="text-3xl font-bold text-stone-900 mb-2">5. State Recovery</h2>
+                <p class="text-stone-600 max-w-2xl">Use checkpoints for micro-pauses or unexpected task switches without writing a full handoff note.</p>
+            </header>
+
+            <div class="bg-white p-8 rounded-2xl border border-stone-200 mb-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-xl">❄️</div>
+                    <div>
+                        <h3 class="font-bold text-lg">The 'Checkpoint' Command</h3>
+                        <p class="text-sm text-stone-500">Freezes local uncommitted work with a 1-line hint.</p>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <code class="block mono bg-stone-100 p-4 rounded text-stone-800 mb-4">checkpoint "middle of debugging odoo payload"</code>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-sm font-bold uppercase tracking-widest text-stone-400 mb-3">How to Resume</h4>
+                        <ul class="text-sm space-y-2 text-stone-700">
+                            <li>• <strong>Same Agent:</strong> Just say "Let's unfreeze and keep going."</li>
+                            <li>• <strong>New Agent:</strong> Say "Check the top of TODO_AGENT.md for the checkpoint hint."</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold uppercase tracking-widest text-stone-400 mb-3">Best Practice</h4>
+                        <p class="text-sm text-stone-600">When the feature is finally 100% done, tell the agent: <br><span class="italic">"Squash our temporary checkpoints into one semantic commit."</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Tab Management
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            // Remove active style from buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active-tab');
+            });
+
+            // Show selected
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('active-tab');
+
+            // Initialize charts if needed
+            if (tabId === 'isolate') initIsolationChart();
+        }
+
+        // Utility: Copy to Clipboard
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Prompt copied to clipboard!');
+            });
+        }
+
+        // Visualization: Isolation Efficiency
+        let isolationChartInstance = null;
+        function initIsolationChart() {
+            const ctx = document.getElementById('isolationChart').getContext('2d');
+            if (isolationChartInstance) isolationChartInstance.destroy();
+
+            isolationChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Standard (Linear)', 'Worktrees (Parallel)'],
+                    datasets: [{
+                        label: 'Concurrency Efficiency (%)',
+                        data: [45, 95],
+                        backgroundColor: ['#e5e0db', '#d4a373'],
+                        borderRadius: 8,
+                        barThickness: 60
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { display: false }
+                        },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Initialize first tab
+        window.onload = () => switchTab('start');
+    </script>
+</body>
+</html>
