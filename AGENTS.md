@@ -1,1 +1,42 @@
-404: Not Found
+# AgentOS Global Governance Framework
+
+This repository is actively developed by multiple AI agents (Claude Code, Antigravity 2.0) alongside human developers.
+
+## 1. Core Directives
+- **Source of Truth:** GitHub is the central synchronization point. Never assume local files are up to date.
+- **Initialization:** ALWAYS run `git fetch origin` and `git pull --rebase origin $(git branch --show-current)` before analyzing the codebase for a new prompt.
+
+## 2. Branching Strategy
+- NEVER commit directly to the `main` branch.
+- **Pre-Task Sequence:** Before beginning any new coding task, analyze the user's prompt, generate a semantic branch name (e.g., `feat/your-feature`), and execute `git checkout -b <branch_name>`.
+
+### Branching & Workspace Isolation
+You are strictly forbidden from writing code on the `main` branch.
+
+**Pre-Execution Branching Sequence:**
+1. When receiving a new task prompt, analyze the intent (feature, fix, refactor, chore).
+2. Generate a semantic branch name (e.g., `feat/zoho-api-sync`, `fix/odoo-timeout`).
+3. Execute `git fetch origin`.
+4. Execute `git checkout -b <generated-branch-name>`.
+5. Only AFTER confirming the branch creation may you begin file modifications or vibe coding sequences.
+
+## 3. Commit Standards
+- Commit frequently to your feature branch to preserve state.
+- Use semantic commit messages (e.g., `feat: added zoho payload builder`, `fix: resolved auth token expiration`).
+- Upon completing a logical milestone, execute `git push -u origin <branch_name>`.
+
+## 4. Multi-Agent Handoff Protocol
+When you hit a token limit, encounter a hard blocker, or are instructed to pause, you MUST perform a state handoff:
+1. Stage and commit your current working state.
+2. Overwrite `TODO_AGENT.md` strictly using the template below. Be extremely concise.
+3. Do not include conversational filler in your terminal output.
+
+---
+
+### Handoff Template to overwrite in `TODO_AGENT.md`:
+```
+**🎯 Goal:** [1-sentence objective]
+**✅ Completed:** [Bullet list of modified files and what works]
+**🛑 Current State / Blockers:** [Exact error message or logical roadblock]
+**⏭️ Next Step:** [Exact file/line to edit next, or command to run]
+```
