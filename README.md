@@ -98,8 +98,14 @@ function agent-os() {
       return 1
     fi
 
-    echo "$content" > "$file"
-    echo "  ✓ $file"
+    if [ "$file" = ".gitignore" ] && [ -f .gitignore ]; then
+      # Append worktree rule to existing .gitignore instead of overwriting
+      grep -q "^\.worktrees" .gitignore || echo -e "\n.worktrees/" >> .gitignore
+      echo "  ✓ $file (appended .worktrees/)"
+    else
+      echo "$content" > "$file"
+      echo "  ✓ $file"
+    fi
   done
 
   echo ""
