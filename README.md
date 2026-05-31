@@ -10,7 +10,7 @@ AgentOS is a **template repository** that establishes a shared "operating system
 - **Clean branch names** — No random strings, IDs, or hashes appended
 - **Worktree isolation** — Multiple agents code simultaneously in separate directories
 - **Sync-before-start** — Agents always pull latest before coding
-- **Structured handoffs** — A parsable `TODO_AGENT.md` template prevents context loss between sessions
+- **Structured handoffs** — A machine-readable `.agent/HANDOFF.md` template prevents context loss between sessions
 - **Agent-specific proxies** — Each agent reads its own config file that routes to the master `AGENTS.md`
 
 ## Quick Start
@@ -40,7 +40,7 @@ cd .worktrees/feat/add-login
 
 ```bash
 branch feat/auth-service
-# Creates branch, scaffolds feat/auth-service/ folder with TODO_AGENT.md, auto-commits
+# Creates branch, scaffolds feat/auth-service/.agent/HANDOFF.md, auto-commits
 ```
 
 ### Manual Setup
@@ -55,7 +55,7 @@ branch feat/auth-service
 ├── AGENTS.md              # Master governance (source of truth)
 ├── CLAUDE.md              # Claude Code proxy → reads AGENTS.md
 ├── .agent/rules/sync.md   # Antigravity proxy → reads AGENTS.md
-├── TODO_AGENT.md          # Handoff state template
+├── .agent/HANDOFF.md      # Machine-readable handoff state template
 ├── .gitignore             # Excludes .worktrees/
 └── README.md              # You are here
 ```
@@ -76,7 +76,8 @@ function new() {
   echo "🚀 Bootstrapping AgentOS for $1..."
   gh repo create "$1" --template="Oudoo/AgentOS" --private --clone
   cd "$1" || exit
-  echo "## Current Status\n- Fresh AgentOS initialization." > TODO_AGENT.md
+  mkdir -p .agent
+  echo "## GOAL\nFresh AgentOS initialization." > .agent/HANDOFF.md
   echo "✅ AgentOS deployed. Repository $1 is ready."
 }
 
@@ -89,7 +90,7 @@ function agent-os() {
   fi
 
   local TEMPLATE_REPO="Oudoo/AgentOS"
-  local FILES=("AGENTS.md" "CLAUDE.md" "TODO_AGENT.md" ".agent/rules/sync.md" ".gitignore")
+  local FILES=("AGENTS.md" "CLAUDE.md" ".agent/HANDOFF.md" ".agent/rules/sync.md" ".gitignore")
 
   echo "🔄 Injecting AgentOS governance from $TEMPLATE_REPO..."
 
@@ -116,7 +117,7 @@ function agent-os() {
   done
 
   echo ""
-  git add AGENTS.md CLAUDE.md .agent/ TODO_AGENT.md .gitignore
+  git add AGENTS.md CLAUDE.md .agent/ .gitignore
   git --no-pager diff --cached --stat
 
   echo ""
@@ -127,7 +128,7 @@ function agent-os() {
     git commit -m "chore: implement AgentOS governance framework"
     echo "✅ AgentOS applied."
   else
-    git reset HEAD AGENTS.md CLAUDE.md .agent/ TODO_AGENT.md .gitignore &>/dev/null
+    git reset HEAD AGENTS.md CLAUDE.md .agent/ .gitignore &>/dev/null
     echo "⏪ Aborted. Files on disk but not committed."
   fi
 }
@@ -170,29 +171,43 @@ function branch() {
   git checkout -b "$1"
 
   # Create subproject folder at project root
-  mkdir -p "$1"
+  mkdir -p "$1/.agent"
 
   # Seed localized handoff template
-  cat > "$1/TODO_AGENT.md" << 'HANDOFF'
-# Agent Handoff State
+  cat > "$1/.agent/HANDOFF.md" << 'HANDOFF'
+## LAST_AGENT
+[Agent Name]
 
-**🎯 Goal:** [1-sentence description of the overarching objective]
+## BRANCH
+[Branch Name]
 
-**✅ Completed in Last Session:**
-- [File path]: [Brief description of what was added/fixed]
+## LAST_COMMIT
+[Commit Hash]
 
-**🛑 Current State / Blockers:**
-- [Describe the exact state where work stopped. If there is an error, paste the exact error code/message here].
+## UPDATED
+[Timestamp]
 
-**⏭️ Immediate Next Step:**
-- [The EXACT file, line number, or terminal command the incoming agent should execute first to resume momentum].
+## GOAL
+[1-sentence description of the overarching objective]
+
+## CURRENT_STATE
+[What works, what doesn't]
+
+## BLOCKER
+[Exact error message or logical roadblock]
+
+## NEXT_STEP
+[Exact file/line to edit next, or command to run]
+
+## FILES
+[List of active files the agent should load]
 HANDOFF
 
   git add "$1/"
   git commit -m "chore: initialize subproject workspace for $1"
 
   echo "✅ Branch '$1' created with subproject folder."
-  echo "   Edit $1/TODO_AGENT.md to set the goal, then start coding."
+  echo "   Edit $1/.agent/HANDOFF.md to set the goal, then start coding."
 }
 
 # Usage: map
@@ -225,14 +240,72 @@ function checkpoint() {
 
   echo "🥶 Freezing active session state..."
   
-  # Write a fast memory update directly to the top of the handoff note
-  sed -i '' "1s/^/⚠️ QUICK CHECKPOINT: $1 (Saved: $(date))\n\n/" TODO_AGENT.md 2>/dev/null || \
-  echo "⚠️ QUICK CHECKPOINT: $1 (Saved: $(date))\n\n$(cat TODO_AGENT.md)" > TODO_AGENT.md
+  # Write a fast memory update to the machine-readable handoff file
+  local handoff_file=".agent/HANDOFF.md"
+  if [ -f "$handoff_file" ]; then
+    perl -pi -e "s/## CURRENT_STATE/## CURRENT_STATE\n⚠️ QUICK CHECKPOINT: $1 (Saved: $(date))/g" "$handoff_file"
+    perl -pi -e "s/## UPDATED\n.*/## UPDATED\n$(date -u +'%Y-%m-%d %H:%M UTC')/g" "$handoff_file"
+  else
+    mkdir -p .agent
+    echo -e "## CURRENT_STATE\n⚠️ QUICK CHECKPOINT: $1 (Saved: $(date))" > "$handoff_file"
+  fi
 
   git add .
   git commit -m "checkpoint: $1 [ci skip]"
   
   echo "✅ State frozen under temporary commit. Incoming agent will see the checkpoint message."
+}
+
+# Usage: resume
+# Reads the state file and prints a clean snapshot
+function resume() {
+  if [ ! -f .agent/HANDOFF.md ]; then
+    echo "❌ No .agent/HANDOFF.md found."
+    return 1
+  fi
+  echo "🔄 Resuming Agent Session..."
+  awk '
+    /^## GOAL/ { flag="goal"; goal=""; next }
+    /^## BLOCKER/ { flag="blocker"; blocker=""; next }
+    /^## NEXT_STEP/ { flag="next"; next_step=""; next }
+    /^## / { flag=""; next }
+    flag=="goal" && NF { if(goal=="") goal=$0; else goal=goal " " $0 }
+    flag=="blocker" && NF { if(blocker=="") blocker=$0; else blocker=blocker " " $0 }
+    flag=="next" && NF { if(next_step=="") next_step=$0; else next_step=next_step " " $0 }
+    END {
+      printf "🎯 GOAL: %s\n", goal
+      printf "🛑 BLOCKER: %s\n", blocker
+      printf "⏭️ NEXT STEP: %s\n", next_step
+    }
+  ' .agent/HANDOFF.md
+}
+
+# Usage: doctor
+# Health check command for AgentOS repository
+function doctor() {
+  echo "🏥 AgentOS Health Check..."
+  
+  if git rev-parse --is-inside-work-tree &>/dev/null; then
+    echo "  ✓ Git initialized"
+  else
+    echo "  ❌ Git initialized"
+  fi
+
+  if git remote -v | grep -q 'origin'; then
+    echo "  ✓ Remote connected"
+  else
+    echo "  ❌ Remote connected"
+  fi
+
+  [ -f AGENTS.md ] && echo "  ✓ AGENTS.md exists" || echo "  ❌ AGENTS.md exists"
+  [ -f CLAUDE.md ] && echo "  ✓ CLAUDE.md exists" || echo "  ❌ CLAUDE.md exists"
+  [ -f .agent/HANDOFF.md ] && echo "  ✓ .agent/HANDOFF.md exists" || echo "  ❌ .agent/HANDOFF.md exists"
+  
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    echo "  ✓ Branch clean"
+  else
+    echo "  ❌ Branch clean (uncommitted changes)"
+  fi
 }
 ```
 
@@ -244,8 +317,8 @@ Then run `source ~/.zshrc` to activate.
 2. **Proxy routes to `AGENTS.md`** → agent learns the governance rules
 3. **Agent creates a feature branch** → never touches `main`
 4. **Agent codes, commits, pushes** → preserves state on remote
-5. **Agent concludes** → fills `TODO_AGENT.md` with structured handoff state
-6. **Next agent reads `TODO_AGENT.md`** → resumes instantly without re-analyzing the entire codebase
+5. **Agent concludes** → fills `.agent/HANDOFF.md` with structured handoff state
+6. **Next agent reads `.agent/HANDOFF.md`** → resumes instantly without re-analyzing the entire codebase
 
 ## Worktree Isolation (Multi-Agent Concurrency)
 
@@ -295,17 +368,19 @@ git worktree remove .worktrees/feat/add-login
 | **Start a completely new project container** | `new centro-aeo-geo` | Clones your GitHub template, sets up a private repo, and changes directories into it. | **Saves 5-10 minutes of manual configuration.** Zero token impact yet. |
 | **Add AgentOS rules to an existing app** | `agent-os` | Downloads rules, hooks proxies, and safely appends to your `.gitignore`. | **Stops agent amnesia.** Future incoming agents instantly understand boundaries. |
 | **Isolate work to a separate folder** | `worktree feat/login` | Spawns a physical directory at `.worktrees/feat/login` tied to that branch. | **Enables parallel coding.** Multiple agents can code at the exact same time without file or server conflicts. |
-| **Start a clean subproject workspace** | `branch aeo-service` | Creates a branch, builds a dedicated folder, seeds a local `TODO_AGENT.md`, and auto-commits. | **Zero random numbers in branch names.** Keeps multi-app repos perfectly organized. |
+| **Start a clean subproject workspace** | `branch aeo-service` | Creates a branch, builds a dedicated folder, seeds a local `.agent/HANDOFF.md`, and auto-commits. | **Zero random numbers in branch names.** Keeps multi-app repos perfectly organized. |
 | **Before launching any agent sequence** | `map` | Builds a compressed architectural text tree at `.agent/repo-map.md`. | **Saves up to 40% on discovery tokens.** Stops agents from blindly reading every file to understand structure. |
-| **An agent hits a token wall or you switch tools** | *Promoted prompt inside agent chat* | Agent populates the detailed `TODO_AGENT.md` template, commits, and pushes. | **Context retention is 100%.** Incoming agent picks up exactly where the last one stopped. |
-| **You need a fast session pause without a full handoff** | `checkpoint "debugging auth"` | Records uncommitted work with a fast git snapshot and drops a 1-line timestamped note. | **Saves context on a time crunch.** Prevents losing local state when switching mental tracks quickly. |
+| **An agent hits a token wall or you switch tools** | *Promoted prompt inside agent chat* | Agent populates the detailed `.agent/HANDOFF.md` template, commits, and pushes. | **Context retention is 100%.** Incoming agent picks up exactly where the last one stopped. |
+| **You need a fast session pause without a full handoff** | `checkpoint "debugging auth"` | Records uncommitted work with a fast git snapshot and drops a 1-line timestamped note into `.agent/HANDOFF.md`. | **Saves context on a time crunch.** Prevents losing local state when switching mental tracks quickly. |
+| **You resume an interrupted session** | `resume` | Parses the state file and prints the GOAL, BLOCKER, and NEXT_STEP to the terminal. | **Instant mental context restoration.** You and your agent know exactly what to do next. |
+| **You need to verify the environment** | `doctor` | Runs a health check on the repository for AgentOS compliance. | **Catches structural errors early.** Ensures the handoff files and remote targets exist. |
 
 ## Complete End-to-End Workflow Map
 
 1. **Morning Routine (The Scaffold):** Run `new <name>` or navigate to your project and run `branch <name>`. Run `map` once immediately before opening your agent code editor.
 2. **The Active Coding Cycle:** Give your prompt to Claude Code or Antigravity inside your branch or worktree folder. They read the map, find their files surgically, and write code.
 3. **The Micro-Pause:** If you need to step away or jump to another task unexpectedly, drop a `checkpoint "fixing endpoint layout"` in your terminal.
-4. **The Pivot Handoff:** When an agent runs low on tokens or hits a complex wall, use the structured prompt to force a `TODO_AGENT.md` generation, push to GitHub, and open your second agent using the clean instructions.
+4. **The Pivot Handoff:** When an agent runs low on tokens or hits a complex wall, use the structured prompt to force a `.agent/HANDOFF.md` generation, push to GitHub, and open your second agent using the clean instructions. Or, run `resume` to recall where you were.
 
 ## License
 

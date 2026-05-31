@@ -43,17 +43,39 @@ When multiple agents need to work simultaneously on different features, use **Gi
 ## 4. Multi-Agent Handoff Protocol
 When you hit a token limit, encounter a hard blocker, or are instructed to pause, you MUST perform a state handoff:
 1. Stage and commit your current working state.
-2. Overwrite `TODO_AGENT.md` strictly using the template below. Be extremely concise.
+2. Overwrite `.agent/HANDOFF.md` strictly using the machine-readable template below. Be extremely concise.
 3. Do not include conversational filler in your terminal output.
 
 ---
 
-### Handoff Template to overwrite in `TODO_AGENT.md`:
-```
-**🎯 Goal:** [1-sentence objective]
-**✅ Completed:** [Bullet list of modified files and what works]
-**🛑 Current State / Blockers:** [Exact error message or logical roadblock]
-**⏭️ Next Step:** [Exact file/line to edit next, or command to run]
+### Handoff Template to overwrite in `.agent/HANDOFF.md`:
+```markdown
+## LAST_AGENT
+[Agent Name]
+
+## BRANCH
+[Branch Name]
+
+## LAST_COMMIT
+[Commit Hash]
+
+## UPDATED
+[Timestamp]
+
+## GOAL
+[1-sentence description of the overarching objective]
+
+## CURRENT_STATE
+[What works, what doesn't]
+
+## BLOCKER
+[Exact error message or logical roadblock]
+
+## NEXT_STEP
+[Exact file/line to edit next, or command to run]
+
+## FILES
+[List of active files the agent should load]
 ```
 
 ## 5. Token-Optimization Directives (CRITICAL)
