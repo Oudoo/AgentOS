@@ -61,20 +61,52 @@ function new-ai-project() {
   echo "✅ AgentOS deployed. Repository $1 is ready for Claude and Antigravity."
 }
 
-# Inject AgentOS governance into an existing repo
+# Inject AgentOS governance into an existing repo (works with private repos)
 function apply-agent-os() {
-  echo "Injecting AgentOS governance into current repository..."
+  # Guard: must be inside a git repo
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    echo "❌ Error: Not inside a git repository."
+    return 1
+  fi
 
-  curl -s -o AGENTS.md https://raw.githubusercontent.com/Oudoo/AgentOS/main/AGENTS.md
-  curl -s -o CLAUDE.md https://raw.githubusercontent.com/Oudoo/AgentOS/main/CLAUDE.md
-  mkdir -p .agent/rules
-  curl -s -o .agent/rules/sync.md https://raw.githubusercontent.com/Oudoo/AgentOS/main/.agent/rules/sync.md
-  curl -s -o TODO_AGENT.md https://raw.githubusercontent.com/Oudoo/AgentOS/main/TODO_AGENT.md
+  local TEMPLATE_REPO="Oudoo/AgentOS"
+  local FILES=("AGENTS.md" "CLAUDE.md" "TODO_AGENT.md" ".agent/rules/sync.md")
 
+  echo "🔄 Injecting AgentOS governance from $TEMPLATE_REPO..."
+
+  # Download each file using gh api (authenticates for private repos)
+  for file in "${FILES[@]}"; do
+    local dir=$(dirname "$file")
+    [ "$dir" != "." ] && mkdir -p "$dir"
+
+    local content
+    content=$(gh api "repos/$TEMPLATE_REPO/contents/$file" --jq '.content' 2>/dev/null | base64 --decode 2>/dev/null)
+
+    if [ -z "$content" ]; then
+      echo "❌ Failed to fetch $file — aborting. No files were changed."
+      return 1
+    fi
+
+    echo "$content" > "$file"
+    echo "  ✓ $file"
+  done
+
+  # Preview changes before committing
+  echo ""
   git add AGENTS.md CLAUDE.md .agent/ TODO_AGENT.md
-  git commit -m "chore: implement AgentOS governance framework"
+  git --no-pager diff --cached --stat
 
-  echo "✅ AgentOS applied to existing project."
+  echo ""
+  read -q "REPLY?Commit these changes? (y/n) "
+  echo ""
+
+  if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+    git commit -m "chore: implement AgentOS governance framework"
+    echo "✅ AgentOS applied to existing project."
+  else
+    git reset HEAD AGENTS.md CLAUDE.md .agent/ TODO_AGENT.md &>/dev/null
+    echo "⏪ Aborted. Changes unstaged — files are still on disk but not committed."
+  fi
 }
 ```
 
