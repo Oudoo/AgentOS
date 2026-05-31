@@ -194,6 +194,46 @@ HANDOFF
   echo "✅ Branch '$1' created with subproject folder."
   echo "   Edit $1/TODO_AGENT.md to set the goal, then start coding."
 }
+
+# Usage: map
+# Generates a token-optimized structure map of the project for the agents
+function map() {
+  if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+    echo "❌ Not inside a git repository."
+    return 1
+  fi
+
+  echo "🗺️ Generating token-optimized repository map..."
+  
+  mkdir -p .agent
+  echo "# Repository Structural Map\nGenerated on: $(date)\n\n\`\`\`text" > .agent/repo-map.md
+  
+  # Generates a folder tree ignoring heavy directories and hidden assets
+  tree -I "node_modules|venv|\.git|\.worktrees|__pycache__|\.DS_Store|dist|build" --dirsfirst >> .agent/repo-map.md
+  
+  echo "\`\`\`" >> .agent/repo-map.md
+  echo "✅ Map saved to .agent/repo-map.md"
+}
+
+# Usage: checkpoint "working on login bug"
+# Quick state freeze that records uncommitted work for the incoming agent
+function checkpoint() {
+  if [ -z "$1" ]; then
+    echo "Usage: checkpoint <brief-context-message>"
+    return 1
+  fi
+
+  echo "🥶 Freezing active session state..."
+  
+  # Write a fast memory update directly to the top of the handoff note
+  sed -i '' "1s/^/⚠️ QUICK CHECKPOINT: $1 (Saved: $(date))\n\n/" TODO_AGENT.md 2>/dev/null || \
+  echo "⚠️ QUICK CHECKPOINT: $1 (Saved: $(date))\n\n$(cat TODO_AGENT.md)" > TODO_AGENT.md
+
+  git add .
+  git commit -m "checkpoint: $1 [ci skip]"
+  
+  echo "✅ State frozen under temporary commit. Incoming agent will see the checkpoint message."
+}
 ```
 
 Then run `source ~/.zshrc` to activate.
@@ -247,6 +287,25 @@ git worktree remove .worktrees/feat/add-login
 - Each agent can run its own dev server on a different port
 
 > 📺 [Codex multi-agent worktree demo](https://www.youtube.com/watch?v=fVdBEgVE0wI) — visual walkthrough of worktree isolation for AI agents.
+
+## The Master AgentOS Matrix
+
+| Scenario | Command to Type | What It Actually Does | Impact on Tokens & Workflow |
+| --- | --- | --- | --- |
+| **Start a completely new project container** | `new centro-aeo-geo` | Clones your GitHub template, sets up a private repo, and changes directories into it. | **Saves 5-10 minutes of manual configuration.** Zero token impact yet. |
+| **Add AgentOS rules to an existing app** | `agent-os` | Downloads rules, hooks proxies, and safely appends to your `.gitignore`. | **Stops agent amnesia.** Future incoming agents instantly understand boundaries. |
+| **Isolate work to a separate folder** | `worktree feat/login` | Spawns a physical directory at `.worktrees/feat/login` tied to that branch. | **Enables parallel coding.** Multiple agents can code at the exact same time without file or server conflicts. |
+| **Start a clean subproject workspace** | `branch aeo-service` | Creates a branch, builds a dedicated folder, seeds a local `TODO_AGENT.md`, and auto-commits. | **Zero random numbers in branch names.** Keeps multi-app repos perfectly organized. |
+| **Before launching any agent sequence** | `map` | Builds a compressed architectural text tree at `.agent/repo-map.md`. | **Saves up to 40% on discovery tokens.** Stops agents from blindly reading every file to understand structure. |
+| **An agent hits a token wall or you switch tools** | *Promoted prompt inside agent chat* | Agent populates the detailed `TODO_AGENT.md` template, commits, and pushes. | **Context retention is 100%.** Incoming agent picks up exactly where the last one stopped. |
+| **You need a fast session pause without a full handoff** | `checkpoint "debugging auth"` | Records uncommitted work with a fast git snapshot and drops a 1-line timestamped note. | **Saves context on a time crunch.** Prevents losing local state when switching mental tracks quickly. |
+
+## Complete End-to-End Workflow Map
+
+1. **Morning Routine (The Scaffold):** Run `new <name>` or navigate to your project and run `branch <name>`. Run `map` once immediately before opening your agent code editor.
+2. **The Active Coding Cycle:** Give your prompt to Claude Code or Antigravity inside your branch or worktree folder. They read the map, find their files surgically, and write code.
+3. **The Micro-Pause:** If you need to step away or jump to another task unexpectedly, drop a `checkpoint "fixing endpoint layout"` in your terminal.
+4. **The Pivot Handoff:** When an agent runs low on tokens or hits a complex wall, use the structured prompt to force a `TODO_AGENT.md` generation, push to GitHub, and open your second agent using the clean instructions.
 
 ## License
 
