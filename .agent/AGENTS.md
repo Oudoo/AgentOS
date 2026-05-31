@@ -38,7 +38,7 @@ When multiple agents need to work simultaneously on different features, use **Gi
 ## 3. Commit Standards
 - Commit frequently to your feature branch to preserve state.
 - Use semantic commit messages (e.g., `feat: added zoho payload builder`, `fix: resolved auth token expiration`).
-- Upon completing a logical milestone, execute `git push -u origin <branch_name>`.
+- Upon completing a logical milestone, execute `git push origin HEAD`. NEVER run a bare `git push` as it may push unintended branches.
 
 ## 4. Multi-Agent Handoff Protocol
 When you hit a token limit, encounter a hard blocker, or are instructed to pause, you MUST perform a state handoff:
