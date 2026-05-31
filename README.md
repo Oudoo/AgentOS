@@ -11,7 +11,7 @@ AgentOS is a **template repository** that establishes a shared "operating system
 - **Worktree isolation** — Multiple agents code simultaneously in separate directories
 - **Sync-before-start** — Agents always pull latest before coding
 - **Structured handoffs** — A machine-readable `.agent/HANDOFF.md` template prevents context loss between sessions
-- **Agent-specific proxies** — Each agent reads its own config file that routes to the master `AGENTS.md`
+- **Agent-specific proxies** — Each agent reads its own config file that routes to the master `.agent/AGENTS.md`
 
 ## Quick Start
 
@@ -51,11 +51,13 @@ branch feat/auth-service
 
 ## File Structure
 
-```
-├── AGENTS.md              # Master governance (source of truth)
+```text
+.
+├── .agent/
+│   ├── AGENTS.md          # Master governance (source of truth)
+│   ├── HANDOFF.md         # Machine-readable handoff state template
+│   └── rules/sync.md      # Antigravity proxy → reads AGENTS.md
 ├── CLAUDE.md              # Claude Code proxy → reads AGENTS.md
-├── .agent/rules/sync.md   # Antigravity proxy → reads AGENTS.md
-├── .agent/HANDOFF.md      # Machine-readable handoff state template
 ├── .gitignore             # Excludes .worktrees/
 └── README.md              # You are here
 ```
@@ -90,7 +92,7 @@ function agent-os() {
   fi
 
   local TEMPLATE_REPO="Oudoo/AgentOS"
-  local FILES=("AGENTS.md" "CLAUDE.md" ".agent/HANDOFF.md" ".agent/rules/sync.md" ".gitignore")
+  local FILES=(".agent/AGENTS.md" "CLAUDE.md" ".agent/HANDOFF.md" ".agent/rules/sync.md" ".gitignore")
 
   echo "🔄 Injecting AgentOS governance from $TEMPLATE_REPO..."
 
@@ -117,7 +119,7 @@ function agent-os() {
   done
 
   echo ""
-  git add AGENTS.md CLAUDE.md .agent/ .gitignore
+  git add .agent/ CLAUDE.md .gitignore
   git --no-pager diff --cached --stat
 
   echo ""
@@ -128,7 +130,7 @@ function agent-os() {
     git commit -m "chore: implement AgentOS governance framework"
     echo "✅ AgentOS applied."
   else
-    git reset HEAD AGENTS.md CLAUDE.md .agent/ .gitignore &>/dev/null
+    git reset HEAD .agent/ CLAUDE.md .gitignore &>/dev/null
     echo "⏪ Aborted. Files on disk but not committed."
   fi
 }
@@ -297,7 +299,7 @@ function doctor() {
     echo "  ❌ Remote connected"
   fi
 
-  [ -f AGENTS.md ] && echo "  ✓ AGENTS.md exists" || echo "  ❌ AGENTS.md exists"
+  [ -f .agent/AGENTS.md ] && echo "  ✓ .agent/AGENTS.md exists" || echo "  ❌ .agent/AGENTS.md exists"
   [ -f CLAUDE.md ] && echo "  ✓ CLAUDE.md exists" || echo "  ❌ CLAUDE.md exists"
   [ -f .agent/HANDOFF.md ] && echo "  ✓ .agent/HANDOFF.md exists" || echo "  ❌ .agent/HANDOFF.md exists"
   
@@ -313,8 +315,8 @@ Then run `source ~/.zshrc` to activate.
 
 ## How It Works
 
-1. **Agent starts a session** → reads its proxy file (`CLAUDE.md` or `.agent/rules/sync.md`)
-2. **Proxy routes to `AGENTS.md`** → agent learns the governance rules
+1. **Initialize Repo** → `new my-project` or `agent-os`
+2. **Proxy routes to `.agent/AGENTS.md`** → agent learns the governance rules
 3. **Agent creates a feature branch** → never touches `main`
 4. **Agent codes, commits, pushes** → preserves state on remote
 5. **Agent concludes** → fills `.agent/HANDOFF.md` with structured handoff state

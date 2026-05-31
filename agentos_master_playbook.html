@@ -239,7 +239,7 @@
                         <code class="block font-mono p-4 rounded-xl mb-5 text-sm shadow-inner">agent-os</code>
                         <div class="space-y-3">
                             <p class="text-sm text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">When:</strong> Adding rules to an existing repository.</p>
-                            <p class="text-sm text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">How:</strong> Injects AGENTS.md, proxies, and appends to .gitignore.</p>
+                            <p class="text-sm text-slate-600 dark:text-slate-300"><strong class="text-slate-900 dark:text-white">How:</strong> Injects .agent/AGENTS.md, proxies, and appends to .gitignore.</p>
                             <p class="text-sm text-slate-400 dark:text-slate-500 italic">"Prevents agents from hallucinating legacy folder structures."</p>
                         </div>
                     </div>
@@ -251,7 +251,7 @@
                         <i data-lucide="book-open" class="text-brand-500 dark:text-brand-400 w-5 h-5"></i> The Governance Core
                     </h3>
                     <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-6 relative z-10 max-w-3xl">
-                        Bootstrapping installs the <strong class="text-slate-900 dark:text-white">AGENTS.md</strong> file. This is the "brain" of your project. It contains strict directives that forbid committing to main and force agents to sync before starting.
+                        Bootstrapping installs the <strong class="text-slate-900 dark:text-white">.agent/AGENTS.md</strong> file. This is the "brain" of your project. It contains strict directives that forbid committing to main and force agents to sync before starting.
                     </p>
                     <div class="flex flex-wrap gap-3 relative z-10">
                         <span class="px-3 py-1.5 bg-slate-200/50 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-full text-xs font-medium text-slate-700 dark:text-slate-200">No Main Commits</span>
@@ -469,7 +469,7 @@ Do not give me any introductory conversational filler. Go straight to coding.</p
                             <span class="text-brand-400">🏥 AgentOS Health Check...</span><br>
                             &nbsp;&nbsp;<span class="text-emerald-500">✓</span> Git initialized<br>
                             &nbsp;&nbsp;<span class="text-emerald-500">✓</span> Remote connected<br>
-                            &nbsp;&nbsp;<span class="text-emerald-500">✓</span> AGENTS.md exists<br>
+                            &nbsp;&nbsp;<span class="text-emerald-500">✓</span> .agent/AGENTS.md exists<br>
                             &nbsp;&nbsp;<span class="text-emerald-500">✓</span> CLAUDE.md exists<br>
                             &nbsp;&nbsp;<span class="text-emerald-500">✓</span> .agent/HANDOFF.md exists<br>
                             &nbsp;&nbsp;<span class="text-red-400">❌</span> Branch clean (uncommitted changes)
