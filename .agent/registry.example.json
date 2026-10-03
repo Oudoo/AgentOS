@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "projects": {
+    "example-app": {
+      "owner": "CHANGE_ME",
+      "repository": "https://github.com/OWNER/APP",
+      "stage": "migration-preparation",
+      "environment": "staging",
+      "secret_reference": "owner password manager / app staging",
+      "deployment_manifest": "deploy/compose.yaml",
+      "backup_runbook": "docs/restore.md",
+      "cutover_approved": false
+    }
+  }
+}

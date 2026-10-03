@@ -1,2 +1,12 @@
 # Worktree isolation directories
 .worktrees/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.dump
+*.sql.gz
+.agent/private/

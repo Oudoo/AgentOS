@@ -1,26 +1,10 @@
-## LAST_AGENT
-[Agent Name]
+# AgentOS orientation
+Owner: Mahmoud Hassan.
 
-## BRANCH
-[Branch Name]
+Read AGENTS.md, .agent/AGENTS.md, and .agent/config.json. The private coordination
+repository's agentos-state branch holds live tasks and per-task handoffs. Run
+`python3 scripts/agentos.py status` from an enrolled repository to resume.
 
-## LAST_COMMIT
-[Commit Hash]
-
-## UPDATED
-[Timestamp]
-
-## GOAL
-[1-sentence description of the overarching objective]
-
-## CURRENT_STATE
-[What works, what doesn't]
-
-## BLOCKER
-[Exact error message or logical roadblock]
-
-## NEXT_STEP
-[Exact file/line to edit next, or command to run]
-
-## FILES
-[List of active files the agent should load]
+Current template work: shared coding-client imports, safe adoption, Git-backed
+ownership/session claims, handoffs, and environment locks. See docs/coordination.md.
+Never copy private operational metadata or secrets into this public template.
